@@ -4,7 +4,9 @@ import {Directive, ElementRef, HostBinding, HostListener} from '@angular/core';
   selector: '[appDropdown]'
 })
 export class DropdownDirective {
+  // the open css class opens the div containing the menu items
   @HostBinding('class.open') isOpen = false;
+  // the below was the first attempt
   // @HostListener('click') toggleOpen() {
   //   this.isOpen = !this.isOpen;
   // }
