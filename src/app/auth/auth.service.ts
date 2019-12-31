@@ -1,9 +1,10 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
-import {Observable, throwError} from 'rxjs';
-import {catchError} from 'rxjs/operators';
+import {BehaviorSubject, Observable, throwError} from 'rxjs';
+import {catchError, tap} from 'rxjs/operators';
+import {User} from './user.model';
 
-export interface AuthReponseData {
+export interface AuthResponseData {
   kind: string;
   idToken: string;
   email: string;
@@ -18,28 +19,43 @@ export interface AuthReponseData {
 })
 export class AuthService {
   fbKey = 'AIzaSyD_QfT7tCMI2cfGOY3Kosc0cuYojMqv1aE'; // firebase key
+  user = new BehaviorSubject<User>(null);
 
   constructor(private httpClient: HttpClient) {
   }
 
-  signup(email: string, password: string): Observable<AuthReponseData> {
-    return this.httpClient.post<AuthReponseData>(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${this.fbKey}`,
+  signup(email: string, password: string): Observable<AuthResponseData> {
+    return this.httpClient.post<AuthResponseData>(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${this.fbKey}`,
       {
         email,
         password,
         returnSecureToken: true
       })
-      .pipe(catchError(this.handleError));
+      .pipe(
+        catchError(this.handleError),
+        tap(responseData => {
+          this.handleAuthentication(responseData.email, responseData.localId, responseData.idToken, +responseData.expiresIn);
+        }));
   }
 
   login(email: string, password: string) {
-    return this.httpClient.post<AuthReponseData>(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${this.fbKey}`,
+    return this.httpClient.post<AuthResponseData>(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${this.fbKey}`,
       {
         email,
         password,
         returnSecureToken: true
       })
-      .pipe(catchError(this.handleError));
+      .pipe(
+        catchError(this.handleError),
+        tap(responseData => {
+          this.handleAuthentication(responseData.email, responseData.localId, responseData.idToken, +responseData.expiresIn);
+        }));
+  }
+
+  private handleAuthentication(email: string, userId: string, token: string, expiresIn: number) {
+    const expirationDate = new Date(new Date().getTime() + expiresIn * 1000);
+    const user = new User(email, userId, token, expirationDate);
+    this.user.next(user);
   }
 
   // this method signature matches the expected signature for the catchError operator
