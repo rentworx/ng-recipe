@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {Observable, throwError} from 'rxjs';
 import {catchError} from 'rxjs/operators';
 
@@ -30,15 +30,7 @@ export class AuthService {
         returnSecureToken: true
       })
       .pipe(catchError(errorResponse => {
-        let error = 'An unknown error occurred';
-        if (!errorResponse.error || !errorResponse.error.error) {
-          return throwError(error);
-        }
-        switch (errorResponse.error.error.message) {
-          case 'EMAIL_EXISTS':
-            error = 'This email already exists';
-        }
-        return throwError(error);
+        return this.handleError(errorResponse);
       }));
   }
 
@@ -48,23 +40,28 @@ export class AuthService {
         email,
         password,
         returnSecureToken: true
-      }).pipe(catchError(errorResponse => {
-      let error = 'An unknown error occurred';
-      if (!errorResponse.error || !errorResponse.error.error) {
-        return throwError(error);
-      }
-      switch (errorResponse.error.error.message) {
-        case 'INVALID_PASSWORD':
-          error = 'Invalid password';
-          break;
-        case 'EMAIL_NOT_FOUND':
-          error = 'Email does not exist';
-      }
-      return throwError(error);
-    }));
+      })
+      .pipe(catchError(errorResponse => {
+        return this.handleError(errorResponse);
+      }));
   }
 
-  private handleError() {
+  private handleError(errorResponse: HttpErrorResponse) {
+    let error = 'An unknown error occurred';
+    if (!errorResponse.error || !errorResponse.error.error) {
+      return throwError(error);
+    }
+    switch (errorResponse.error.error.message) {
+      case 'INVALID_PASSWORD':
+        error = 'Invalid password';
+        break;
+      case 'EMAIL_NOT_FOUND':
+        error = 'Email does not exist';
+        break;
+      case 'EMAIL_EXISTS':
+        error = 'This email already exists';
+    }
+    return throwError(error);
 
   }
 }
