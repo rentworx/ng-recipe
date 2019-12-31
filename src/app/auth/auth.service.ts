@@ -29,9 +29,7 @@ export class AuthService {
         password,
         returnSecureToken: true
       })
-      .pipe(catchError(errorResponse => {
-        return this.handleError(errorResponse);
-      }));
+      .pipe(catchError(this.handleError));
   }
 
   login(email: string, password: string) {
@@ -41,11 +39,10 @@ export class AuthService {
         password,
         returnSecureToken: true
       })
-      .pipe(catchError(errorResponse => {
-        return this.handleError(errorResponse);
-      }));
+      .pipe(catchError(this.handleError));
   }
 
+  // this method signature matches the expected signature for the catchError operator
   private handleError(errorResponse: HttpErrorResponse) {
     let error = 'An unknown error occurred';
     if (!errorResponse.error || !errorResponse.error.error) {
@@ -62,7 +59,6 @@ export class AuthService {
         error = 'This email already exists';
     }
     return throwError(error);
-
   }
 }
 
