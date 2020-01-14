@@ -52,6 +52,11 @@ export class AuthComponent implements OnInit {
 
     authForm.reset();
   }
+
+  onHandleError() {
+    this.error = null;
+  }
+
 }
 
 // https://firebase.google.com/docs/reference/rest/auth#section-create-email-password
