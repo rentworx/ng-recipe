@@ -5,6 +5,7 @@ import {Directive, ViewContainerRef} from '@angular/core';
 })
 export class PlaceholderDirective {
 
+  // https://angular.io/guide/dynamic-component-loader
   constructor(public viewContainerRef: ViewContainerRef) {
   }
 }
