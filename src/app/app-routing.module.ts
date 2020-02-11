@@ -3,7 +3,7 @@ import {NgModule} from '@angular/core';
 
 const appRoutes: Routes = [
   {path: '', redirectTo: '/recipes', pathMatch: 'full'},
-  {path: 'recipes', loadChildren: './recipes/recipes.module#RecipesModule'},
+  {path: 'recipes', loadChildren: () => import('./recipes/recipes.module').then(m => m.RecipesModule)},
   {path: 'shopping-list', loadChildren: './shopping-list/shopping-list.module#ShoppingListModule'},
   {path: 'auth', loadChildren: './auth/auth.module#AuthModule'}
 ];
